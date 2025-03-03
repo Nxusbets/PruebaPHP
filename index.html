@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Demostración de Lenguajes</title>
+</head>
+<body>
+    <h1>Usuarios</h1>
+    <form id="agregar-usuario-form">
+        <input type="text" id="nombre" placeholder="Nombre">
+        <input type="email" id="email" placeholder="Email">
+        <button type="submit">Agregar Usuario</button>
+    </form>
+    <ul id="usuarios-lista"></ul>
+    <script>
+        const usuariosLista = document.getElementById('usuarios-lista');
+
+        function cargarUsuarios() {
+            fetch('/api')
+                .then(response => response.json())
+                .then(usuarios => {
+                    usuariosLista.innerHTML = '';
+                    usuarios.forEach(usuario => {
+                        const item = document.createElement('li');
+                        item.innerHTML = `${usuario.nombre} (${usuario.email}) <button onclick="eliminarUsuario('${usuario._id.$oid}')">Eliminar</button>`;
+                        usuariosLista.appendChild(item);
+                    });
+                });
+        }
+
+        cargarUsuarios();
+
+        document.getElementById('agregar-usuario-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            fetch('/agregar_usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, email })
+            }).then(() => cargarUsuarios());
+        });
+
+        function eliminarUsuario(id) {
+            fetch('/eliminar_usuario', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            }).then(() => cargarUsuarios());
+        }
+    </script>
+</body>
+</html>
